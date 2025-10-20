@@ -1,8 +1,8 @@
 services:
   dns_checker:
-    image: charly3012/dns_checker
+    image: charly3012/dns-checker
     #build: .
-    container_name: dns_checker
+    container_name: dns-checker
     restart: unless-stopped
 
     env_file:
