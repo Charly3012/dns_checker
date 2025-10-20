@@ -10,9 +10,9 @@ and [Semantic Versioning](https://semver.org/lang/es/).
 
 ---
 
-## [.1.0] - 2025-10-19
+## [0.1.0] - 2025-10-19
 ### Added
-- Support to chenge DNS Nameserver
+- Support to change DNS Nameserver
 - Support multiple domains with a list in environments
 - Notifications through Microsoft Teams with Webhook
 
@@ -20,3 +20,13 @@ and [Semantic Versioning](https://semver.org/lang/es/).
 - Avoid cache system
 
 ---
+
+## [0.2.0] - 2025-10-19
+### Added
+- Support connect througt telnet to update dial in IP in Draytek
+- Supoort check domains without change dial IP at Draytek
+
+### Fixed
+
+---
+
