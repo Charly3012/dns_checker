@@ -30,3 +30,10 @@ and [Semantic Versioning](https://semver.org/lang/es/).
 
 ---
 
+## [0.2.1] - 2025-10-19
+### Added
+
+### Fixed
+- Add missing dependency 'telnetlib3'
+
+---
