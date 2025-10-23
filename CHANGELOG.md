@@ -24,16 +24,24 @@ and [Semantic Versioning](https://semver.org/lang/es/).
 ## [0.2.0] - 2025-10-19
 ### Added
 - Support connect througt telnet to update dial in IP in Draytek
-- Supoort check domains without change dial IP at Draytek
+- Support check domains without change dial IP at Draytek
 
 ### Fixed
 
 ---
 
-## [0.2.1] - 2025-10-19
+## [0.2.1] - 2025-10-21
 ### Added
 
 ### Fixed
 - Add missing dependency 'telnetlib3'
+
+---
+
+## [0.2.2] - 2025-10-23
+### Added
+
+### Fixed
+- Hot fix when the flag 'host_check' in a domain is false the teams message were not sent
 
 ---

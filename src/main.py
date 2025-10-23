@@ -164,15 +164,13 @@ def check_domains():
                 print(f"[!] {record.domain} changed: {oldIp} → {ip}")
                 message = f"{record.domain} ha cambiado: {oldIp} → {ip}. "
 
-                if not record.hostCheck:
-                    continue
+                if record.hostCheck:
+                    success = change_dial_from_ip(record.index, ip)
 
-                success = change_dial_from_ip(record.index, ip)
-
-                if success:
-                    message += "IP Cambiada exitosamente en el Draytek"
-                else:
-                    message += "Error cambiando la IP en el Draytek"
+                    if success:
+                        message += "IP Cambiada exitosamente en el Draytek"
+                    else:
+                        message += "Error cambiando la IP en el Draytek"
 
                 send_teams_message(message)
 
