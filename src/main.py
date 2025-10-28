@@ -92,14 +92,6 @@ class DnsRecord:
         self.ip = ip
 
 def init_records(domainsStr: str, hostCheckStr: str, indexStr) -> list:
-    """
-    Craate a DnsRecord list from domains and hostCheck strings
-    
-    domains: ['nasatizi.ddns.net', 'nasavall.ddns.net', 'nasamty.ddns.net']
-    hostCheck: [0, 1, 1]
-    index: 
-    """
-
     domains = domainsStr.replace(' ', '').split(',')
     hostChecks = hostCheckStr.replace(' ', '').split(',')
     indexs = indexStr.replace(' ', '').split(',')
@@ -109,7 +101,7 @@ def init_records(domainsStr: str, hostCheckStr: str, indexStr) -> list:
 
     dns_list = []
     for i, domain in enumerate(domains):
-        hc = bool(hostChecks[i])
+        hc = bool(int(hostChecks[i]))
         record = DnsRecord(domain, hostCheck=hc, index=indexs[i])
         dns_list.append(record)
 
@@ -171,6 +163,8 @@ def check_domains():
                         message += "IP Cambiada exitosamente en el Draytek"
                     else:
                         message += "Error cambiando la IP en el Draytek"
+                else: 
+                    message += "No se intenta cambiar en el DrayTek. Cambie la configuración manualmente"
 
                 send_teams_message(message)
 

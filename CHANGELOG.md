@@ -45,3 +45,11 @@ and [Semantic Versioning](https://semver.org/lang/es/).
 - Hot fix when the flag 'host_check' in a domain is false the teams message were not sent
 
 ---
+
+## [0.2.3] - 2025-10-27
+### Added
+
+### Fixed
+- Hot fix in 'HostCheck' flag, bad parse to bool
+
+---
