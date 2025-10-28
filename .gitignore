@@ -1,9 +1,15 @@
 #Security
 .env
 
-
 #SRC
 
 
 #Docker
 
+
+#Compiler
+__pycache__/
+*.pyc
+
+#Develop environment
+/ignore
