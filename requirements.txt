@@ -1,3 +1,4 @@
 requests
 dnspython
 telnetlib3
+pydantic

@@ -1,9 +1,11 @@
-class DnsRecord:
-    def __init__(self, domain, index, ip=None, hostCheck=False):
-        self.domain = domain
-        self.index = index
-        self.hostCheck = hostCheck
-        self.ip = ip
+from pydantic import BaseModel
+
+class DnsRecord(BaseModel):
+    domain: str
+    ip: str | None = None
+    draytek_index: int
+    change_in_draytek: bool = False
+    change_in_azure: bool = False
 
     def update_ip(self, new_ip):
         self.ip = new_ip

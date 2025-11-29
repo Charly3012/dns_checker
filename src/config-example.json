@@ -1,0 +1,42 @@
+{
+    "general" : {
+        "interval" : 20,
+        "loggin_mode" : "console",
+        "tries" : 3
+    },
+    "notifier" : {
+        "teams_webhook_url" : ""
+    },
+    "dns_resolver" : {
+        "domain_type" : "A",
+        "nameservers" : ["1.1.1.1"]
+    },
+    "draytek" : {
+        "host" : "192.168.1.1",
+        "user" : "admin-example", 
+        "password" : "password-example",
+        "read_timeout" : 2
+    },
+    "azure" : {
+        "tenant_id" : "",
+        "client_id" : "",
+        "client_secret" : "",
+        "nsgs" : [
+            {
+                "subscription_id" : "",
+                "resource_group" : "", 
+                "name" : "",
+                "rule" : ""
+            }
+        ]
+    },
+    "domains" : [
+        {
+            "host" : "example.com",
+            "ip" : "172.0.0.1",
+            "draytek_index" : 1, 
+            "change_in_draytek" : true,
+            "change_in_azure" : false
+        }
+    ]
+}
