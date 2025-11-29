@@ -53,3 +53,14 @@ and [Semantic Versioning](https://semver.org/lang/es/).
 - Hot fix in 'HostCheck' flag, bad parse to bool
 
 ---
+
+## [1.0.0] Stable version - 2025-11-29
+### Added
+- Support to change ip rules in NSG
+- New method to configure variables in application via json 
+- Support for multiple attempts in change operations in Azure NSG and DrayTek
+
+### Fixed
+- 
+
+---
