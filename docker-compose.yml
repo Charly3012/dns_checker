@@ -1,17 +1,11 @@
 services:
   dns_checker:
-    image: charly3012/dns-checker
+    image: charly3012/dns-checker:latest
     #build: .
     container_name: dns-checker
     restart: unless-stopped
 
-    env_file:
-      - .env
+    volumes:
+    - ./path/to/config.json:/app/config.json #See config-example.json to configure application
 
-    # environment:
-    #   - CHECK_INTERVAL=60 #Seconds
-    #   - DOMAIN_TYPE=A
-    #   - DNS_NAMESERVER=1.1.1.1 
-    #   - DOMAINS= domain1.com, domain2.com, domain3.com
-    #   - WEBHOOK_URL=
 
