@@ -2,3 +2,5 @@ requests
 dnspython
 telnetlib3
 pydantic
+azure-identity
+azure-mgmt-network

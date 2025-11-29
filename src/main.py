@@ -4,6 +4,7 @@ from config.models import AppConfig
 from services.dns_service import DnsService
 from services.draytek_service import DraytekService
 from services.notifier_service import NotifierService
+from services.azure_nsg_service import AzureNsgService
 from app.checker import Checker
 
 if __name__ == "__main__":
@@ -22,6 +23,12 @@ if __name__ == "__main__":
             config.draytek.password
             )
         
+        nsg_service = AzureNsgService(
+            config.azure.tenant_id, 
+            config.azure.client_id,
+            config.azure.client_secret
+        )
+
         notifier = NotifierService(
             config.notifier.teams_webhook_url
             )
@@ -29,8 +36,10 @@ if __name__ == "__main__":
         app = Checker(
             dns_service, 
             draytek_service, 
+            nsg_service,
             notifier, 
             config.records, 
+            config.azure.nsgs,
             config.general.tries
             )
 

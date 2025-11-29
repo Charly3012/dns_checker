@@ -1,42 +1,42 @@
 {
-    "general" : {
-        "interval" : 20,
-        "loggin_mode" : "console",
-        "tries" : 3
+    "general": {
+        "interval": 20,
+        "loggin_mode": "console",
+        "tries": 3
     },
-    "notifier" : {
-        "teams_webhook_url" : ""
+    "notifier": {
+        "teams_webhook_url": ""
     },
-    "dns_resolver" : {
-        "domain_type" : "A",
-        "nameservers" : ["1.1.1.1"]
+    "dns_resolver": {
+        "domain_type": "A",
+        "nameservers": ["1.1.1.1"]
     },
-    "draytek" : {
-        "host" : "192.168.1.1",
-        "user" : "admin-example", 
-        "password" : "password-example",
-        "read_timeout" : 2
+    "draytek": {
+        "host": "192.168.0.1",
+        "user": "admin",
+        "password": "your-password-here",
+        "read_timeout": 2
     },
-    "azure" : {
-        "tenant_id" : "",
-        "client_id" : "",
-        "client_secret" : "",
-        "nsgs" : [
+    "azure": {
+        "tenant_id": "your-tenant-id",
+        "client_id": "your-client-id",
+        "client_secret": "your-client-secret",
+        "nsgs": [
             {
-                "subscription_id" : "",
-                "resource_group" : "", 
-                "name" : "",
-                "rule" : ""
+                "subscription_id": "your-subscription-id",
+                "resource_group": "your-resource-group",
+                "name": "your-nsg-name",
+                "rule": "your-rule-name"
             }
         ]
     },
-    "domains" : [
+    "records": [
         {
-            "host" : "example.com",
-            "ip" : "172.0.0.1",
-            "draytek_index" : 1, 
-            "change_in_draytek" : true,
-            "change_in_azure" : false
+            "domain": "example.com",
+            "ip": "",
+            "draytek_index": 1,
+            "change_in_draytek": false,
+            "change_in_azure": false
         }
     ]
 }
