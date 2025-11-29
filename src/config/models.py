@@ -6,7 +6,7 @@ from models.dns_record import DnsRecord
 
 class GeneralConfig(BaseModel):
     interval: int
-    loggin_mode: str
+    loggin_mode: str = "stdout"
     tries: int
 
 

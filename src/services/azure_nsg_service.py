@@ -1,6 +1,7 @@
 from azure.identity import ClientSecretCredential
 from azure.mgmt.network import NetworkManagementClient
 from config.models import AzureNSGConfig
+from services.log_service import LogService
 
 class AzureNsgService:
     def __init__(self, tenant_id: str, client_id: str, client_secret: str):
@@ -18,7 +19,7 @@ class AzureNsgService:
 
         network = NetworkManagementClient(self.credential, subscription_id)
 
-        #print(f"[AZURE] Obteniendo NSG {nsg_name}...")
+        #LogService.log(f"[AZURE] Obteniendo NSG {nsg_name}...")
 
         nsg = network.network_security_groups.get(resource_group, nsg_name)
 
@@ -30,21 +31,21 @@ class AzureNsgService:
                 break
 
         if not rule:
-            #print(f"[AZURE] Rule {nsg_config.name} not found")
+            #LogService.log(f"[AZURE] Rule {nsg_config.name} not found")
             return False
 
-        #print(f"[AZURE] IPs actuales: {rule.source_address_prefixes}")
+        #LogService.log(f"[AZURE] IPs actuales: {rule.source_address_prefixes}")
 
         if old_ip in rule.source_address_prefixes:
             rule.source_address_prefixes.remove(old_ip)
-            #print(f"[AZURE] Removiendo {old_ip}")
+            #LogService.log(f"[AZURE] Removiendo {old_ip}")
         #else:
-            #print(f"[AZURE] La IP anterior {old_ip} no estaba en la regla")
+            #LogService.log(f"[AZURE] La IP anterior {old_ip} no estaba en la regla")
 
-        #print(f"[AZURE] Añadiendo {new_ip}")
+        #LogService.log(f"[AZURE] Añadiendo {new_ip}")
         rule.source_address_prefixes.append(new_ip)
 
-        #print(f"[AZURE] Guardando cambios en Azure...")
+        #LogService.log(f"[AZURE] Guardando cambios en Azure...")
 
         try:
             poller = network.network_security_groups.begin_create_or_update(
@@ -53,9 +54,9 @@ class AzureNsgService:
                 nsg
             )
             poller.result()
-            #print("[AZURE] ¡Regla actualizada!")
+            #LogService.log("[AZURE] ¡Regla actualizada!")
             return True
 
         except Exception as ex:
-            #print(f"[AZURE] ERROR al actualizar la regla: {ex}")
+            #LogService.log(f"[AZURE] ERROR al actualizar la regla: {ex}")
             return False

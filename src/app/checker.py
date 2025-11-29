@@ -1,10 +1,10 @@
-from datetime import datetime
 from models.dns_record import DnsRecord
 from services.dns_service import DnsService
 from services.draytek_service import DraytekService
 from services.notifier_service import NotifierService
 from services.azure_nsg_service import AzureNsgService
 from config.models import AzureNSGConfig
+from services.log_service import LogService
 
 
 
@@ -20,7 +20,7 @@ class Checker:
 
     def check_all(self):
         changed_flag = False
-        print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Checking DNS resolutions...")
+        LogService.log("[CHECK] Checking DNS resolutions...\n")
 
         for rec in self.records:
 
@@ -31,14 +31,14 @@ class Checker:
             if not old_ip:
                 changed_flag = True
                 rec.update_ip(new_ip)
-                print(f"[INIT] {rec.domain} → {new_ip}")
+                LogService.log(f"[INIT] {rec.domain} → {new_ip}")
                 continue
 
             if new_ip == old_ip:
                 continue
 
             changed_flag = True
-            print(f"[CHANGE] {rec.domain}: {old_ip} → {new_ip}")
+            LogService.log(f"[CHANGE] {rec.domain}: {old_ip} → {new_ip}")
             msg = f"{rec.domain}: {old_ip} → {new_ip}. "
 
             if rec.change_in_draytek:
@@ -66,7 +66,7 @@ class Checker:
         
 
         if not changed_flag:
-            print("[INFO] Ningúna IP cambio")
+            LogService.log("[INFO] Ningúna IP cambio")
 
 
     def try_change_draytek(self, draytek_index: int, ip: str):
@@ -75,9 +75,9 @@ class Checker:
                 success = self.draytek_service.update_dial_from_ip(draytek_index, ip)
                 if success:
                     return True
-                print(f"[TRY FAILED] Draytek update index:{draytek_index} ip:{ip} try:{attempt}/{self.tries}")
+                LogService.log(f"[TRY FAILED] Draytek update index:{draytek_index} ip:{ip} try:{attempt}/{self.tries}")
             except Exception as e:
-                print(f"[TRY ERROR] Draytek fallo intento {attempt}: {e}")
+                LogService.log(f"[TRY ERROR] Draytek fallo intento {attempt}: {e}")
 
         return False
     
@@ -85,7 +85,7 @@ class Checker:
         all_success = True  
 
         for nsg in self.nsgs:
-            #print(f"\n[NSG] Modificando regla en: {nsg.name}")
+            #LogService.log(f"\n[NSG] Modificando regla en: {nsg.name}")
 
             success_for_this_nsg = False
 
@@ -98,17 +98,17 @@ class Checker:
                     )
 
                     if success:
-                        #print(f"[OK] NSG '{nsg.name}' actualizada correctamente")
+                        #LogService.log(f"[OK] NSG '{nsg.name}' actualizada correctamente")
                         success_for_this_nsg = True
                         break
 
-                    print(f"[TRY FAILED] Intento fallido {attempt}/{self.tries}")
+                    LogService.log(f"[TRY FAILED] Intento fallido {attempt}/{self.tries}")
 
                 except Exception as e:
-                    print(f"[TRY ERROR] NSG '{nsg.name}' intento {attempt}: {e}")
+                    LogService.log(f"[TRY ERROR] NSG '{nsg.name}' intento {attempt}: {e}")
 
             if not success_for_this_nsg:
-                #print(f"[NSG] No se pudo actualizar la NSG '{nsg.name}' después de {self.tries} intentos")
+                #LogService.log(f"[NSG] No se pudo actualizar la NSG '{nsg.name}' después de {self.tries} intentos")
                 all_success = False
 
         return all_success

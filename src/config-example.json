@@ -1,7 +1,7 @@
 {
     "general": {
         "interval": 20,
-        "loggin_mode": "console",
+        "loggin_mode": "stdout",
         "tries": 3
     },
     "notifier": {

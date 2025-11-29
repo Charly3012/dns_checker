@@ -1,3 +1,8 @@
 #Security
 .env
 /src/config.json
+
+#Development
+/src/service.log
+*.log
+.vscode

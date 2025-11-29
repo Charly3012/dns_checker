@@ -1,4 +1,5 @@
 import time
+import os
 from config.loader import ConfigLoader
 from config.models import AppConfig
 from services.dns_service import DnsService
@@ -6,11 +7,18 @@ from services.draytek_service import DraytekService
 from services.notifier_service import NotifierService
 from services.azure_nsg_service import AzureNsgService
 from app.checker import Checker
+from services.log_service import LogService
 
 if __name__ == "__main__":
     try:
         #Load configuration 
         config: AppConfig = ConfigLoader.load()
+
+        #Loggin config
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        LOG_PATH = os.path.join(BASE_DIR, "service.log")
+
+        LogService.configure(mode=config.general.loggin_mode, file_path=LOG_PATH)
 
         dns_service = DnsService(
             config.dns_resolver.nameservers, 
@@ -43,15 +51,15 @@ if __name__ == "__main__":
             config.general.tries
             )
 
-        print("Starting DNS checker...\n")
+        LogService.log("[INIT] Starting DNS checker...\n")
 
         while True:
             app.check_all()
             time.sleep(config.general.interval)
 
     except KeyboardInterrupt:
-        print("\n[X] Stopped by user.")
+        LogService.log("[X] Stopped by user. \n")
     except Exception as e:
-        print(f"[X] Unexpected error: {e}")
+        LogService.log(f"[X] Unexpected error: {e}\n")
         raise e
         

@@ -47,7 +47,7 @@ All settings are defined in a single JSON file such as `config.json` you can see
 {
     "general": {
         "interval": 20,
-        "loggin_mode": "console",
+        "loggin_mode": "stdout",
         "tries": 3
     },
     "notifier": {
@@ -94,7 +94,7 @@ All settings are defined in a single JSON file such as `config.json` you can see
 | Field         | Default   | Description                                                  |
 | ------------- | --------- | ------------------------------------------------------------ |
 | `interval`    | `20`      | Interval (seconds) between DNS checks.                       |
-| `loggin_mode` | `console` | Reserved for future logging output modes (e.g., file, JSON). |
+| `loggin_mode` | `stdout` | Mode to show logs (stdout, file, both). |
 | `tries`       | `2`       | Number of retry attempts for operations (DrayTek or NSG).    |
 
 
@@ -179,6 +179,7 @@ services:
 
         volumes:
             - ./path/to/config.json:/app/config.json #See config-example.json to configure application
+            - ./path/to/service.log:/app/service.log #Optional to see system logs if `loggin_mode` is file or both
 
 ```
 
