@@ -9,57 +9,63 @@ from services.azure_nsg_service import AzureNsgService
 from app.checker import Checker
 from services.log_service import LogService
 
-if __name__ == "__main__":
-    try:
-        #Load configuration 
-        config: AppConfig = ConfigLoader.load()
 
-        #Loggin config
-        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-        LOG_PATH = os.path.join(BASE_DIR, "service.log")
+def main():
+    #Load configuration 
+    config: AppConfig = ConfigLoader.load()
 
-        LogService.configure(mode=config.general.loggin_mode, file_path=LOG_PATH)
+    #Loggin config
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    LOG_PATH = os.path.join(BASE_DIR, "service.log")
 
-        dns_service = DnsService(
-            config.dns_resolver.nameservers, 
-            config.dns_resolver.domain_type
-            )
-        
-        draytek_service = DraytekService(
-            config.draytek.host, 
-            config.draytek.user, 
-            config.draytek.password
-            )
-        
-        nsg_service = AzureNsgService(
-            config.azure.tenant_id, 
-            config.azure.client_id,
-            config.azure.client_secret
+    LogService.configure(mode=config.general.loggin_mode, file_path=LOG_PATH)
+
+    dns_service = DnsService(
+        config.dns_resolver.nameservers, 
+        config.dns_resolver.domain_type
+        )
+    
+    draytek_service = DraytekService(
+        config.draytek.host, 
+        config.draytek.user, 
+        config.draytek.password
+        )
+    
+    nsg_service = AzureNsgService(
+        config.azure.tenant_id, 
+        config.azure.client_id,
+        config.azure.client_secret
+    )
+
+    notifier = NotifierService(
+        config.notifier.teams_webhook_url
         )
 
-        notifier = NotifierService(
-            config.notifier.teams_webhook_url
-            )
+    app = Checker(
+        dns_service, 
+        draytek_service, 
+        nsg_service,
+        notifier, 
+        config.records, 
+        config.azure.nsgs,
+        config.general.tries
+        )
 
-        app = Checker(
-            dns_service, 
-            draytek_service, 
-            nsg_service,
-            notifier, 
-            config.records, 
-            config.azure.nsgs,
-            config.general.tries
-            )
+    LogService.log("[INIT] Starting DNS checker...\n")
 
-        LogService.log("[INIT] Starting DNS checker...\n")
+    while True:
+        app.check_all()
+        time.sleep(config.general.interval)
 
-        while True:
-            app.check_all()
-            time.sleep(config.general.interval)
 
+if __name__ == "__main__":
+    try:
+        main()
     except KeyboardInterrupt:
         LogService.log("[X] Stopped by user. \n")
     except Exception as e:
         LogService.log(f"[X] Unexpected error: {e}\n")
         raise e
         
+
+

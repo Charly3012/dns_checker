@@ -18,6 +18,8 @@ class ConfigLoader:
             if not config_path.is_absolute():
                 config_path = base_dir / path
 
+            print(f"Buscando configuración en: {config_path.absolute()}")
+
             if not config_path.exists():
                 raise FileNotFoundError(f"Config file not fount: {path}")
             

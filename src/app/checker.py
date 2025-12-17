@@ -31,15 +31,15 @@ class Checker:
             if not old_ip:
                 changed_flag = True
                 rec.update_ip(new_ip)
-                LogService.log(f"[INIT] {rec.domain} → {new_ip}")
+                LogService.log(f"[INIT] {rec.domain} -> {new_ip}")
                 continue
 
             if new_ip == old_ip:
                 continue
 
             changed_flag = True
-            LogService.log(f"[CHANGE] {rec.domain}: {old_ip} → {new_ip}")
-            msg = f"{rec.domain}: {old_ip} → {new_ip}. "
+            LogService.log(f"[CHANGE] {rec.domain}: {old_ip} -> {new_ip}")
+            msg = f"{rec.domain}: {old_ip} -> {new_ip}. "
 
             if rec.change_in_draytek:
                 if self.try_change_draytek(rec.draytek_index, new_ip):
