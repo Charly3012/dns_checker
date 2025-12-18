@@ -191,6 +191,60 @@ docker compose up -d
 
 ---
 
+## Windows service deploy
+
+This section guides you through the process of setting up the DNS Checker as a native Windows Service using **NSSM** (Non-Sucking Service Manager). This ensures the script runs in the background and starts automatically with the system.
+
+> **IMPORTANT:** 
+> Before proceeding, ensure you have already configured your `config.json` file. The service will look for this file to load your domain settings and API credentials.
+
+### Prerequisites
+1.  **Python:** Must be installed on the host machine.
+2.  **Admin Privileges:** You must run the installation scripts with Administrator rights.
+
+### Installation steps
+1.  **Download NSSM:**
+    * Download the official `.zip` from [nssm.cc/download](https://nssm.cc/download).
+    * Extract `nssm.exe` (use the version inside the `win64` folder).
+    * Place it inside the `service_setup/` folder.
+    * **Note:** The executable must be named exactly `nssm.exe`.
+2.  **Configure the Python Path:**
+    The script needs to know exactly which Python interpreter to use.
+    * Open `service_setup/install.bat` with a text editor (like Notepad or VS Code).
+    * Edit the following line with your **absolute path** (or something like that :b):
+        ```batch
+        set PYTHON_EXE=C:\Users\<YourUser>\AppData\Local\Programs\Python\Python314\python.exe
+        ```
+    * Save and close the file.
+
+3.  **Run the Installer:**
+    Open a terminal (PowerShell or CMD) **as Administrator** at the root of the repository and execute:
+    ```powershell
+    .\service_setup\install.bat
+    ```
+
+4.  **Verify the Service:**
+    * Open the Windows Services Manager (`services.msc`).
+    * Look for the service named **DnsChecker**.
+    * Confirm the status is **Running**.
+
+### Monitoring and Logs
+
+If the service starts but stops unexpectedly, or if you need to monitor its behavior, check the following locations:
+
+* **Application Logs:** Check the log file path defined in your `config.json`.
+* **Service Emergency Logs:** If Python crashes before initializing the logger, check the automatically generated logs in the project root:
+    * `logs/nssm_out.log`: Standard console output.
+    * `logs/nssm_errors.log`: Detailed Python error tracebacks (e.g., Missing modules or Path errors).
+
+### Uninstallation
+
+To completely remove the service from your system, run the following command from the repository root as Administrator:
+
+```powershell
+.\service_setup\uninstall.bat
+```
+
 ## Changelog
 
 See [CHANGELOG](CHANGELOG.md) for version history and changes.
