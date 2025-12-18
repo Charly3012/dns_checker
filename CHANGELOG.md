@@ -64,3 +64,13 @@ and [Semantic Versioning](https://semver.org/lang/es/).
 - 
 
 ---
+
+## [1.1.0] Windows service version - 2025-12-17
+### Added
+- Multiple ways to log (stdout, log file)
+- Allow run as windows service with NSSM
+
+### Fixed
+- Quit conflictive characters
+
+---

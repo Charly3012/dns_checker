@@ -4,7 +4,6 @@
 :: ===========================================
 :: Ecample: C:\Python312\python.exe or venv path
 ::set PYTHON_EXE=
-set PYTHON_EXE="C:\Users\carlo\AppData\Local\Programs\Python\Python314\python.exe"
 :: ===========================================
 
 set FOLDER=%~dp0
