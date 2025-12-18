@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 from typing import Optional
 from .models import AppConfig
+from services.log_service import LogService
 
 class ConfigLoader: 
     _config: Optional[AppConfig] = None
@@ -18,7 +19,7 @@ class ConfigLoader:
             if not config_path.is_absolute():
                 config_path = base_dir / path
 
-            print(f"Buscando configuración en: {config_path.absolute()}")
+            LogService.log(f"Buscando configuración en: {config_path.absolute()}")
 
             if not config_path.exists():
                 raise FileNotFoundError(f"Config file not fount: {path}")
