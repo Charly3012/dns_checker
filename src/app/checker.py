@@ -26,6 +26,11 @@ class Checker:
 
             new_ip = self.dns_service.resolve_ip(rec.domain)
             old_ip = rec.ip
+
+            if new_ip == "x.x.x.x":
+                changed_flag = True
+                self.notifier.send(f"DnsService.Error: Some wrong with dns resolution/service to {rec.domain}, check log for more information")
+                continue;
             
             # First time
             if not old_ip:

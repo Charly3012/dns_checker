@@ -1,4 +1,5 @@
 import dns.resolver
+from services.log_service import LogService
 
 class DnsService:
 
@@ -8,5 +9,10 @@ class DnsService:
         self.domain_type = domain_type
 
     def resolve_ip(self, domain):
-        answers = self.resolver.resolve(domain, self.domain_type, tcp=True)
-        return answers[0].to_text()
+        try:
+
+            answers = self.resolver.resolve(domain, self.domain_type, tcp=True)
+            return answers[0].to_text()
+        except Exception as e:
+            LogService.log(f"[X] DnsService.Error: {e}")
+            return "x.x.x.x"
