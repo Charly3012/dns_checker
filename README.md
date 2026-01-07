@@ -199,7 +199,7 @@ This section guides you through the process of setting up the DNS Checker as a n
 > Before proceeding, ensure you have already configured your `config.json` file. The service will look for this file to load your domain settings and API credentials.
 
 ### Prerequisites
-1.  **Python:** Must be installed on the host machine.
+1.  **Python:** Must be installed on the host machine. Version 3.10+ recommended.
 2.  **Admin Privileges:** You must run the installation scripts with Administrator rights.
 
 ### Installation steps
@@ -208,42 +208,70 @@ This section guides you through the process of setting up the DNS Checker as a n
     * Extract `nssm.exe` (use the version inside the `win64` folder).
     * Place it inside the `service_setup/` folder.
     * **Note:** The executable must be named exactly `nssm.exe`.
-2.  **Configure the Python Path:**
-    The script needs to know exactly which Python interpreter to use.
-    * Open `service_setup/install.bat` with a text editor (like Notepad or VS Code).
-    * Edit the following line with your **absolute path** (or something like that :b):
-        ```batch
-        set PYTHON_EXE=C:\Users\<YourUser>\AppData\Local\Programs\Python\Python314\python.exe
-        ```
-    * Save and close the file.
+  
+2.  **Run the Installer:**
+    Open a terminal (PowerShell or CMD) **as Administrator** at the root of the repository and execute the `install.ps1`:
 
-3.  **Run the Installer:**
-    Open a terminal (PowerShell or CMD) **as Administrator** at the root of the repository and execute:
+    **Option A (recommended):** Auto-detection Python instance. If Python is in your system PATH, simply run:
+
     ```powershell
-    .\service_setup\install.bat
+    .\service_setup\install.ps1
     ```
 
-4.  **Verify the Service:**
+    **Option B**: Manual Python path. If you have multiple Python versions or it's not in your PATH, provide the absolute path:
+
+    ```powershell
+    .\service_setup\install.ps1 -PYTHON_EXE "C:\Users\<User>\AppData\Local\Programs\Python\Python314\python.exe"
+    ```
+
+3.  **Verify the Service:**
     * Open the Windows Services Manager (`services.msc`).
     * Look for the service named **DnsChecker**.
     * Confirm the status is **Running**.
 
-### Monitoring and Logs
+### Updating the service
+Use this script when you pull new code from the repository. It ensures the service is updated without losing your local configuration.
 
-If the service starts but stops unexpectedly, or if you need to monitor its behavior, check the following locations:
+**Option A (recommended):** Auto-detection Python instance. If Python is in your system PATH, simply run:
 
-* **Application Logs:** Check the log file path defined in your `config.json`.
-* **Service Emergency Logs:** If Python crashes before initializing the logger, check the automatically generated logs in the project root:
-    * `logs/nssm_out.log`: Standard console output.
-    * `logs/nssm_errors.log`: Detailed Python error tracebacks (e.g., Missing modules or Path errors).
+```powershell
+.\service_setup\update.ps1
+```
+
+**Option B**: Manual Python path. If you have multiple Python versions or it's not in your PATH, provide the absolute path:
+
+```powershell
+.\service_setup\update.ps1 -PYTHON_EXE "C:\Users\<User>\AppData\Local\Programs\Python\Python314\python.exe"
+```
+
+**Note:** Asks for confirmation, clears local .py changes (git restore), pulls the latest code, refreshes dependencies, and restarts the service.
 
 ### Uninstallation
 
-To completely remove the service from your system, run the following command from the repository root as Administrator:
+To remove the service from your system, you have two options:
 
+**Full Clean (Default):** Removes the service and deletes all log folders/files.
 ```powershell
-.\service_setup\uninstall.bat
+.\service_setup\uninstall.ps1
 ```
+
+**Preserve Logs:** Removes the service but keeps the log files for auditing.
+```powershell
+.\service_setup\uninstall.ps1 -PreserveLogs
+```
+
+
+### Monitoring and Troubleshooting
+
+If the service starts but stops unexpectedly, or if you need to monitor its behavior, check the following locations:
+
+* **Service Manager:** Open services.msc and look for DnsChecker.
+* **Standard Logs:** Found in service_setup/logs/nssm_out.log.
+* **Error Logs:** If the service fails to start, check service_setup/logs/nssm_errors.log for Python tracebacks.
+* **Service Status:** You can check the real-time status using NSSM:
+    ```PowerShell
+    .\service_setup\nssm.exe status DnsChecker
+    ```
 
 ## Changelog
 
