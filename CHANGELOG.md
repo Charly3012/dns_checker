@@ -74,3 +74,10 @@ and [Semantic Versioning](https://semver.org/lang/es/).
 - Quit conflictive characters
 
 ---
+
+## [1.1.1] - 2026-01-07
+### Added
+- New install, update and uninstall scripts in Powershell to Windows Service deploy
+
+### Fixed
+- Catch error when DNS resolution fails to a domain
