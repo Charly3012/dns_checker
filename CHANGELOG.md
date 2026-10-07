@@ -96,3 +96,9 @@ and [Semantic Versioning](https://semver.org/lang/es/).
 - Old IP not removed when the rule stored it as `x.x.x.x/32` or in `sourceAddressPrefix` (single IP)
 - Duplicated IPs in the rule
 - Azure update errors were swallowed without logging
+
+---
+
+## [1.2.1] - 2026-10-06
+### Changed
+- Azure NSG log shows only the removed and added IPs instead of the full rule
