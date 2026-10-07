@@ -17,6 +17,8 @@ class Checker:
         self.records = records
         self.nsgs = nsgs
         self.tries = tries
+        # IPs viejas que siguen en los NSG porque fallo la actualizacion; se reintenta cada ciclo
+        self.pending_nsg_removals: dict[str, set[str]] = {}
 
     def check_all(self):
         changed_flag = False
@@ -40,11 +42,15 @@ class Checker:
                 continue
 
             if new_ip == old_ip:
+                if self.pending_nsg_removals.get(rec.domain):
+                    changed_flag = True
+                    self.retry_pending_nsgs(rec)
                 continue
 
             changed_flag = True
             LogService.log(f"[CHANGE] {rec.domain}: {old_ip} -> {new_ip}")
             msg = f"{rec.domain}: {old_ip} -> {new_ip}. "
+            rec.update_ip(new_ip)
 
             if rec.change_in_draytek:
                 if self.try_change_draytek(rec.draytek_index, new_ip):
@@ -56,17 +62,18 @@ class Checker:
 
 
             if rec.change_in_azure:
-                nsg_success = self.try_change_nsgs(old_ip, new_ip)
+                self.pending_nsg_removals.setdefault(rec.domain, set()).add(old_ip)
+                nsg_success = self.try_change_nsgs(self.pending_nsg_removals[rec.domain], new_ip)
 
                 if nsg_success:
+                    self.pending_nsg_removals.pop(rec.domain, None)
                     msg += "<br>Actualizado en NSGs de Azure. "
                 else:
-                    msg += "<br>ERROR al actualizar NSGs de Azure. "
+                    msg += "<br>ERROR al actualizar NSGs de Azure, se reintentará en cada ciclo. "
 
             else:
                 msg += "<br>No se actualiza en NSGs Azure. "
-            
-            rec.update_ip(new_ip)
+
             self.notifier.send(msg)
         
 
@@ -86,7 +93,15 @@ class Checker:
 
         return False
     
-    def try_change_nsgs(self, old_ip: str, new_ip: str):
+    def retry_pending_nsgs(self, rec: DnsRecord):
+        pending = self.pending_nsg_removals[rec.domain]
+        LogService.log(f"[RETRY] {rec.domain}: quitando {sorted(pending)} de NSGs, asegurando {rec.ip}")
+
+        if self.try_change_nsgs(pending, rec.ip):
+            self.pending_nsg_removals.pop(rec.domain, None)
+            self.notifier.send(f"{rec.domain}: NSGs de Azure sincronizados con {rec.ip} tras reintento.")
+
+    def try_change_nsgs(self, old_ips: set[str], new_ip: str):
         all_success = True  
 
         for nsg in self.nsgs:
@@ -96,10 +111,10 @@ class Checker:
 
             for attempt in range(1, self.tries + 1):
                 try:
-                    success = self.nsg_service.update_rule_ip(
+                    success = self.nsg_service.sync_rule_ips(
                         nsg_config=nsg,
-                        old_ip=old_ip,
-                        new_ip=new_ip
+                        remove_ips=self.removable_ips(old_ips),
+                        add_ip=new_ip
                     )
 
                     if success:
@@ -118,6 +133,7 @@ class Checker:
 
         return all_success
 
-
-
-
+    def removable_ips(self, ips: set[str]) -> set[str]:
+        # No quitar una IP que otro dominio con change_in_azure sigue usando
+        in_use = {r.ip for r in self.records if r.change_in_azure and r.ip}
+        return ips - in_use

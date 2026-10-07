@@ -1,3 +1,5 @@
+import ipaddress
+from typing import Iterable
 from azure.identity import ClientSecretCredential
 from azure.mgmt.network import NetworkManagementClient
 from config.models import AzureNSGConfig
@@ -11,52 +13,61 @@ class AzureNsgService:
             client_secret=client_secret
         )
 
-    def update_rule_ip(self, nsg_config: AzureNSGConfig, old_ip: str, new_ip: str) -> bool:
-        subscription_id = nsg_config.subscription_id
-        resource_group = nsg_config.resource_group
-        nsg_name = nsg_config.name
-        rule_name = nsg_config.rule
-
-        network = NetworkManagementClient(self.credential, subscription_id)
-
-        #LogService.log(f"[AZURE] Obteniendo NSG {nsg_name}...")
-
-        nsg = network.network_security_groups.get(resource_group, nsg_name)
-
-        # Buscar la regla
-        rule = None
-        for r in nsg.security_rules:
-            if r.name == rule_name:
-                rule = r
-                break
-
-        if not rule:
-            #LogService.log(f"[AZURE] Rule {nsg_config.name} not found")
-            return False
-
-        #LogService.log(f"[AZURE] IPs actuales: {rule.source_address_prefixes}")
-
-        if old_ip in rule.source_address_prefixes:
-            rule.source_address_prefixes.remove(old_ip)
-            #LogService.log(f"[AZURE] Removiendo {old_ip}")
-        #else:
-            #LogService.log(f"[AZURE] La IP anterior {old_ip} no estaba en la regla")
-
-        #LogService.log(f"[AZURE] Añadiendo {new_ip}")
-        rule.source_address_prefixes.append(new_ip)
-
-        #LogService.log(f"[AZURE] Guardando cambios en Azure...")
-
+    @staticmethod
+    def _normalize(prefix: str) -> str:
+        # "1.2.3.4/32" y "1.2.3.4" son la misma IP para la regla
         try:
-            poller = network.network_security_groups.begin_create_or_update(
-                resource_group,
-                nsg_name,
-                nsg
-            )
-            poller.result()
-            #LogService.log("[AZURE] ¡Regla actualizada!")
+            net = ipaddress.ip_network(prefix.strip(), strict=False)
+        except ValueError:
+            return prefix.strip()
+        if net.num_addresses == 1:
+            return str(net.network_address)
+        return str(net)
+
+    def sync_rule_ips(self, nsg_config: AzureNSGConfig, remove_ips: Iterable[str], add_ip: str) -> bool:
+        """
+        Quita remove_ips y asegura add_ip en el origen de la regla.
+        Solo lee/escribe la regla (securityRules/read y securityRules/write), no el NSG completo.
+        """
+        network = NetworkManagementClient(self.credential, nsg_config.subscription_id)
+        rg, nsg_name, rule_name = nsg_config.resource_group, nsg_config.name, nsg_config.rule
+
+        rule = network.security_rules.get(rg, nsg_name, rule_name)
+
+        # Azure guarda una sola IP en source_address_prefix y varias en source_address_prefixes
+        current = list(rule.source_address_prefixes or [])
+        if rule.source_address_prefix:
+            # "*", "Internet", service tags... no se pueden mezclar con IPs
+            if not self._is_ip(rule.source_address_prefix):
+                LogService.log(f"[AZURE] Regla '{rule_name}' en '{nsg_name}' usa origen '{rule.source_address_prefix}', no se modifica")
+                return False
+            current.append(rule.source_address_prefix)
+
+        add_norm = self._normalize(add_ip)
+        to_remove = {self._normalize(ip) for ip in remove_ips if ip} - {add_norm}
+
+        updated = [p for p in current if self._normalize(p) not in to_remove]
+        if add_norm not in {self._normalize(p) for p in updated}:
+            updated.append(add_ip)
+
+        # Quitar duplicados conservando el orden; Azure rechaza prefijos repetidos
+        seen = set()
+        updated = [p for p in updated if not (self._normalize(p) in seen or seen.add(self._normalize(p)))]
+
+        if updated == current and not rule.source_address_prefix:
             return True
 
-        except Exception as ex:
-            #LogService.log(f"[AZURE] ERROR al actualizar la regla: {ex}")
+        rule.source_address_prefix = None
+        rule.source_address_prefixes = updated
+
+        LogService.log(f"[AZURE] '{nsg_name}/{rule_name}': {current} -> {updated}")
+        network.security_rules.begin_create_or_update(rg, nsg_name, rule_name, rule).result()
+        return True
+
+    @staticmethod
+    def _is_ip(prefix: str) -> bool:
+        try:
+            ipaddress.ip_network(prefix.strip(), strict=False)
+            return True
+        except ValueError:
             return False

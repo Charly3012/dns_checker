@@ -138,6 +138,24 @@ Each NSG entry includes:
 | `name`            | NSG name.                        |
 | `rule`            | Name of the rule to update.      |
 
+**Azure permissions (least privilege)**
+
+Create a custom role and assign it to the app registration's service principal **on each NSG** (not on the resource group or subscription):
+
+```json
+{
+  "Name": "DNS Checker - NSG Rule Updater",
+  "IsCustom": true,
+  "Actions": [
+    "Microsoft.Network/networkSecurityGroups/securityRules/read",
+    "Microsoft.Network/networkSecurityGroups/securityRules/write"
+  ],
+  "AssignableScopes": ["/subscriptions/<SUBSCRIPTION_ID>"]
+}
+```
+
+The rule's source must be IP addresses; rules with `*` or service tags as source are not modified.
+
 
 **records**
 A list of records configurations. Each record includes:
