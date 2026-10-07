@@ -60,7 +60,9 @@ class AzureNsgService:
         rule.source_address_prefix = None
         rule.source_address_prefixes = updated
 
-        LogService.log(f"[AZURE] '{nsg_name}/{rule_name}': {current} -> {updated}")
+        removed = [p for p in current if p not in updated]
+        added = [p for p in updated if p not in current]
+        LogService.log(f"[AZURE] '{nsg_name}/{rule_name}': -{removed} +{added}")
         network.security_rules.begin_create_or_update(rg, nsg_name, rule_name, rule).result()
         return True
 
