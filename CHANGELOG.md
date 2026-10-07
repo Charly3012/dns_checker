@@ -81,3 +81,18 @@ and [Semantic Versioning](https://semver.org/lang/es/).
 
 ### Fixed
 - Catch error when DNS resolution fails to a domain
+
+---
+
+## [1.2.0] - 2026-10-06
+### Added
+- Failed Azure NSG updates are retried on every cycle until old IPs are removed
+
+### Changed
+- Azure NSG update now reads/writes only the security rule instead of the whole NSG (least privilege: `securityRules/read` and `securityRules/write`)
+
+### Fixed
+- Old IPs left in NSG rules when the update failed or a later change happened
+- Old IP not removed when the rule stored it as `x.x.x.x/32` or in `sourceAddressPrefix` (single IP)
+- Duplicated IPs in the rule
+- Azure update errors were swallowed without logging
